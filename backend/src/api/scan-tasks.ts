@@ -86,7 +86,6 @@ class ScanTaskSearch {
   async getResults(event) {
     const qs = ScanTask.createQueryBuilder('scan_task')
       .leftJoinAndSelect('scan_task.scan', 'scan')
-      .leftJoinAndSelect('scan_task.organizations', 'organization')
       .orderBy(`scan_task.${this.sort}`, this.order)
       .skip(PAGE_SIZE * (this.page - 1))
       .take(PAGE_SIZE);

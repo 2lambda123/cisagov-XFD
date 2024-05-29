@@ -27,6 +27,7 @@ import * as jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import fetch from 'node-fetch';
+import logger from '../tools/lambda-logger';
 
 const sanitizer = require('sanitizer');
 
@@ -46,7 +47,7 @@ if (
   setInterval(() => scheduler({}, {} as any, () => null), 30000);
 }
 
-const handlerToExpress = (handler) => async (req, res) => {
+const handlerToExpress = (handler) => async (req, res, next) => {
   const { statusCode, body } = await handler(
     {
       pathParameters: req.params,
@@ -56,8 +57,12 @@ const handlerToExpress = (handler) => async (req, res) => {
       headers: req.headers,
       path: req.originalUrl
     },
-    {}
+    {},
+    req.context
   );
+  // Set HSTS header to ensure that the browser enforces HTTPS
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+
   try {
     const parsedBody = JSON.parse(sanitizer.sanitize(body));
     res.status(statusCode).json(parsedBody);
@@ -66,6 +71,30 @@ const handlerToExpress = (handler) => async (req, res) => {
     res.setHeader('content-type', 'text/plain');
     res.status(statusCode).send(sanitizer.sanitize(body));
   }
+};
+
+const logHeaders = (req, res, next) => {
+  const sanitizedHeaders = { ...req.headers };
+  // Remove or replace sensitive headers
+  delete sanitizedHeaders['authorization'];
+
+  res.on('finish', () => {
+    const logInfo = {
+      httpMethod: req.method,
+      protocol: req.protocol,
+      originalURL: req.originalUrl,
+      path: req.path,
+      statusCode: res.statusCode,
+      headers: sanitizedHeaders,
+      userEmail: req.requestContext.authorizer
+        ? req.requestContext.authorizer.email || 'undefined'
+        : 'undefined'
+    };
+
+    logger.info(`Request Info: ${JSON.stringify(logInfo)}`);
+  });
+
+  next();
 };
 
 const app = express();
@@ -98,20 +127,20 @@ app.use(
       directives: {
         defaultSrc: [
           "'self'",
-          'https://cognito-idp.us-east-1.amazonaws.com',
-          'https://api.staging-cd.crossfeed.cyber.dhs.gov'
+          `${process.env.COGNITO_URL}`,
+          `${process.env.BACKEND_DOMAIN}`
         ],
         frameSrc: ["'self'", 'https://www.dhs.gov/ntas/'],
         imgSrc: [
           "'self'",
           'data:',
-          'https://staging-cd.crossfeed.cyber.dhs.gov',
+          `${process.env.FRONTEND_DOMAIN}`,
           'https://www.dhs.gov'
         ],
         objectSrc: ["'none'"],
         scriptSrc: [
           "'self'",
-          'https://api.staging-cd.crossfeed.cyber.dhs.gov',
+          `${process.env.BACKEND_DOMAIN}`,
           'https://www.dhs.gov'
         ],
         frameAncestors: ["'none'"]
@@ -403,7 +432,8 @@ const matomoProxy = createProxyMiddleware({
     if (proxyRes.headers['transfer-encoding'] === 'chunked') {
       proxyRes.headers['transfer-encoding'] = '';
     }
-  }
+  },
+  logLevel: 'silent'
 });
 
 /**
@@ -417,7 +447,8 @@ const peProxy = createProxyMiddleware({
   target: process.env.PE_API_URL,
   pathRewrite: function (path) {
     return path.replace(/^\/pe/, '');
-  }
+  },
+  logLevel: 'silent'
 });
 
 app.use(
@@ -478,6 +509,7 @@ app.use(
 // needing to sign the terms of service yet
 const authenticatedNoTermsRoute = express.Router();
 authenticatedNoTermsRoute.use(checkUserLoggedIn);
+authenticatedNoTermsRoute.use(logHeaders);
 authenticatedNoTermsRoute.get('/users/me', handlerToExpress(users.me));
 authenticatedNoTermsRoute.post(
   '/users/me/acceptTerms',
@@ -493,6 +525,7 @@ const authenticatedRoute = express.Router();
 
 authenticatedRoute.use(checkUserLoggedIn);
 authenticatedRoute.use(checkUserSignedTerms);
+authenticatedRoute.use(logHeaders);
 
 authenticatedRoute.post('/api-keys', handlerToExpress(apiKeys.generate));
 authenticatedRoute.delete('/api-keys/:keyId', handlerToExpress(apiKeys.del));

@@ -327,7 +327,6 @@ export const invite = wrapHandler(async (event) => {
   let user = await User.findOne({
     email: body.email
   });
-
   let organization: Organization | undefined;
 
   if (body.organization) {

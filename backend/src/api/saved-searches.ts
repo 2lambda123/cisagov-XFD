@@ -124,7 +124,6 @@ export const list = wrapHandler(async (event) => {
     : PAGE_SIZE;
   const page = event.query?.page ? parseInt(event.query?.page) : 1;
 
-  console.log(event.query);
   const result = await SavedSearch.findAndCount({
     where,
     take: pageSize,

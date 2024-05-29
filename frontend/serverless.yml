@@ -14,25 +14,27 @@ custom:
     certificateName: ${file(env.yml):${self:provider.stage}.DOMAIN, ''}
     stage: ${self:provider.stage}
     createRoute53Record: false
+  serverlessIfElse:
+    - If: '"${file(env.yml):${self:provider.stage}.ENDPOINT_TYPE}" == "REGIONAL"'
+      Exclude:
+        - provider.vpcEndpointIds
 
 provider:
   name: aws
-  region: us-east-1
-  endpointType: REGIONAL
+  region: ${file(env.yml):${self:provider.stage}.REGION, ''}
+  endpointType: ${file(env.yml):${self:provider.stage}.ENDPOINT_TYPE, ''}
   runtime: nodejs16.x
   timeout: 30
   stage: ${opt:stage, 'dev'}
   environment: ${file(env.yml):${self:provider.stage}, ''}
   vpc: ${file(env.yml):${self:provider.stage}-vpc, ''}
+  vpcEndpointIds:
+    - ${file(env.yml):${self:provider.stage}.VPC_ENDPOINT, ''}
   apiGateway:
     binaryMediaTypes:
       - image/*
       - font/*
-    resourcePolicy:
-      - Effect: Allow
-        Principal: '*'
-        Action: execute-api:Invoke
-        Resource: 'execute-api:/${self:provider.stage}/*/*'
+    resourcePolicy: ${file(env.yml):${self:provider.stage}.RESOURCE_POLICY, ''}
   logs:
     restApi: true
   deploymentBucket:
@@ -59,5 +61,5 @@ functions:
 
 plugins:
   - serverless-domain-manager
-  - serverless-better-credentials
   - serverless-webpack
+  - serverless-plugin-ifelse

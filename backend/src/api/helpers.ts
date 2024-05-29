@@ -149,22 +149,36 @@ export const sendEmail = async (
   subject: string,
   body: string
 ) => {
-  const transporter = nodemailer.createTransport({
-    SES: new SES({ region: 'us-east-1' })
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      SES: new SES({
+        region: process.env.EMAIL_REGION!
+      })
+    });
 
-  await transporter.sendMail({
-    from: process.env.CROSSFEED_SUPPORT_EMAIL_SENDER!,
-    to: recipient,
-    subject: subject,
-    text: body,
-    replyTo: process.env.CROSSFEED_SUPPORT_EMAIL_REPLYTO!
-  });
+    await transporter.sendMail({
+      from: process.env.CROSSFEED_SUPPORT_EMAIL_SENDER!,
+      to: recipient,
+      subject: subject,
+      text: body,
+      replyTo: process.env.CROSSFEED_SUPPORT_EMAIL_REPLYTO!
+    });
+
+    console.log('Email sent successfully');
+    return 'Email sent successfully';
+  } catch (error) {
+    console.error(`Error sending email: ${error}`);
+
+    // Handle the error or re-throw it if needed
+    throw error;
+  }
 };
 
 export const sendRegistrationTextEmail = async (recipient: string) => {
   const transporter = nodemailer.createTransport({
-    SES: new SES({ region: 'us-east-1' })
+    SES: new SES({
+      region: process.env.EMAIL_REGION!
+    })
   });
 
   const mailOptions = {
@@ -185,7 +199,9 @@ export const sendRegistrationTextEmail = async (recipient: string) => {
 
 export const sendRegistrationHtmlEmail = async (recipient: string) => {
   const transporter = nodemailer.createTransport({
-    SES: new SES({ region: 'us-east-1' })
+    SES: new SES({
+      region: process.env.EMAIL_REGION!
+    })
   });
 
   const mailOptions = {
@@ -230,7 +246,9 @@ export const sendUserRegistrationEmail = async (
     };
 
     const transporter = nodemailer.createTransport({
-      SES: new SES({ region: 'us-east-1' })
+      SES: new SES({
+        region: process.env.EMAIL_REGION!
+      })
     });
     await transporter.sendMail(mailOptions);
   } catch (errorMessage) {
@@ -264,7 +282,9 @@ export const sendRegistrationDeniedEmail = async (
     };
 
     const transporter = nodemailer.createTransport({
-      SES: new SES({ region: 'us-east-1' })
+      SES: new SES({
+        region: process.env.EMAIL_REGION!
+      })
     });
     await transporter.sendMail(mailOptions);
   } catch (errorMessage) {
@@ -299,7 +319,9 @@ export const sendRegistrationApprovedEmail = async (
     };
 
     const transporter = nodemailer.createTransport({
-      SES: new SES({ region: 'us-east-1' })
+      SES: new SES({
+        region: process.env.EMAIL_REGION!
+      })
     });
     await transporter.sendMail(mailOptions);
   } catch (errorMessage) {

@@ -14,25 +14,27 @@ custom:
     certificateName: ${file(env.yml):${self:provider.stage}.DOMAIN, ''}
     stage: ${self:provider.stage}
     createRoute53Record: false
+  serverlessIfElse:
+    - If: '"${file(env.yml):${self:provider.stage}.ENDPOINT_TYPE}" == "REGIONAL"'
+      Exclude:
+        - provider.vpcEndpointIds
 
 provider:
   name: aws
-  region: us-east-1
-  endpointType: REGIONAL
+  region: ${file(env.yml):${self:provider.stage}.REGION, ''}
+  endpointType: ${file(env.yml):${self:provider.stage}.ENDPOINT_TYPE, ''}
   runtime: nodejs16.x
   timeout: 30
   stage: ${opt:stage, 'dev'}
   environment: ${file(env.yml):${self:provider.stage}, ''}
   vpc: ${file(env.yml):${self:provider.stage}-vpc, ''}
+  vpcEndpointIds:
+    - ${file(env.yml):${self:provider.stage}.VPC_ENDPOINT, ''}
   apiGateway:
     binaryMediaTypes:
       - image/*
       - font/*
-    resourcePolicy:
-      - Effect: Allow
-        Principal: '*'
-        Action: execute-api:Invoke
-        Resource: execute-api:/${self:provider.stage}/*/*
+    resourcePolicy: ${file(env.yml):${self:provider.stage}.RESOURCE_POLICY, ''}
   logs:
     restApi: true
   deploymentBucket:
@@ -57,10 +59,12 @@ provider:
             - ecs:DescribeServices
             - ecs:UpdateService
             - iam:PassRole
+            - logs:GetLogEvents
           Resource: '*'
         - Effect: Allow
           Action:
             - ses:SendRawEmail
+            - ses:SendEmail
           Resource: '*'
         - Effect: Allow
           Action:
@@ -107,9 +111,19 @@ provider:
           Resource: '*'
 
 resources:
+  Conditions:
+    IsDMZ:
+      Fn::Or:
+        - Fn::Equals:
+            - ${self:provider.stage}
+            - staging
+        - Fn::Equals:
+            - ${self:provider.stage}
+            - prod
   Resources:
     ShodanQueue:
       Type: AWS::SQS::Queue
+      Condition: IsDMZ
       Properties:
         QueueName: ${self:provider.stage}-shodan-queue
         VisibilityTimeout: 18000  # 5 hours
@@ -117,6 +131,7 @@ resources:
         MessageRetentionPeriod: 604800  # 7 days
     DnstwistQueue:
       Type: AWS::SQS::Queue
+      Condition: IsDMZ
       Properties:
         QueueName: ${self:provider.stage}-dnstwist-queue
         VisibilityTimeout: 18000  # 5 hours
@@ -124,6 +139,7 @@ resources:
         MessageRetentionPeriod: 604800  # 7 days
     HibpQueue:
       Type: AWS::SQS::Queue
+      Condition: IsDMZ
       Properties:
         QueueName: ${self:provider.stage}-hibp-queue
         VisibilityTimeout: 18000  # 5 hours
@@ -131,6 +147,7 @@ resources:
         MessageRetentionPeriod: 604800  # 7 days
     IntelxQueue:
       Type: AWS::SQS::Queue
+      Condition: IsDMZ
       Properties:
         QueueName: ${self:provider.stage}-intelx-queue
         VisibilityTimeout: 18000  # 5 hours
@@ -138,6 +155,7 @@ resources:
         MessageRetentionPeriod: 604800  # 7 days
     CybersixgillQueue:
       Type: AWS::SQS::Queue
+      Condition: IsDMZ
       Properties:
         QueueName: ${self:provider.stage}-cybersixgill-queue
         VisibilityTimeout: 18000  # 5 hours
@@ -148,7 +166,9 @@ functions:
   - ${file(./src/tasks/functions.yml)}
   - ${file(./src/api/functions.yml)}
 
+
 plugins:
   - serverless-domain-manager
   - serverless-webpack
   - serverless-dotenv-plugin
+  - serverless-plugin-ifelse
