@@ -5,7 +5,7 @@ module.exports = {
     description: `Crossfeed is a tool that continuously enumerates and monitors an organization's public-facing attack surface in order to discover assets and flag potential security flaws.`,
     navigation: [
       {
-        items: [{ text: 'Home', link: '/' }],
+        items: [{ text: 'Home', link: '/' }]
       },
       {
         items: [
@@ -15,31 +15,31 @@ module.exports = {
             // If rootLink is specified, this navigation item will be
             // highlighted as current when the user navigates to sub-pages whose
             // paths start with the given rootLink.
-            rootLink: '/user-guide/',
-          },
-        ],
+            rootLink: '/user-guide/'
+          }
+        ]
       },
       {
         items: [
-          { text: 'Development', link: '/dev/quickstart/', rootLink: '/dev/' },
-        ],
+          { text: 'Development', link: '/dev/quickstart/', rootLink: '/dev/' }
+        ]
       },
       {
-        items: [{ text: 'Scanning FAQ', link: '/scans/' }],
+        items: [{ text: 'Scanning FAQ', link: '/scans/' }]
       },
       {
         title: '',
-        items: [{ text: 'API Reference', link: '/api-reference/' }],
+        items: [{ text: 'API Reference', link: '/api-reference/' }]
       },
       {
-        items: [{ text: 'ReadySetCyber', link: '/rsc/user-guide' }],
-      },
+        items: [{ text: 'ReadySetCyber', link: '/rsc/user-guide' }]
+      }
     ],
     secondaryLinks: [
       {
         text: 'Find Crossfeed on GitHub',
-        link: 'https://github.com/cisagov/crossfeed',
-      },
+        link: 'https://github.com/cisagov/crossfeed'
+      }
     ],
 
     /**
@@ -60,7 +60,7 @@ module.exports = {
       access_key: '...',
 
       // this renders the results within the page instead of sending to user to search.gov
-      inline: true,
+      inline: true
     },
 
     /**
@@ -105,7 +105,7 @@ module.exports = {
      */
     ga: {
       // ua: 'your-ua',
-    },
+    }
   },
   pathPrefix: process.env.BASEURL || '/',
   plugins: [
@@ -116,15 +116,15 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `images`,
-        path: `${__dirname}/src/images`,
-      },
+        path: `${__dirname}/src/images`
+      }
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `documentation-pages`,
-        path: `${__dirname}/src/documentation-pages`,
-      },
+        path: `${__dirname}/src/documentation-pages`
+      }
     },
     {
       resolve: `gatsby-transformer-remark`,
@@ -136,18 +136,18 @@ module.exports = {
             options: {
               prompt: {
                 user: 'root',
-                host: 'localhost',
-              },
-            },
+                host: 'localhost'
+              }
+            }
           },
           {
             resolve: `gatsby-remark-images`,
             options: {
-              maxWidth: 590,
-            },
-          },
-        ],
-      },
+              maxWidth: 590
+            }
+          }
+        ]
+      }
     },
     {
       resolve: `gatsby-plugin-manifest`,
@@ -158,12 +158,12 @@ module.exports = {
         background_color: `#663399`,
         theme_color: `#663399`,
         display: `minimal-ui`,
-        icon: `src/images/logo.png`, // This path is relative to the root of the site.
-      },
+        icon: `src/images/logo.png` // This path is relative to the root of the site.
+      }
     },
-    `gatsby-plugin-meta-redirect`,
+    `gatsby-plugin-meta-redirect`
     // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
-  ],
+  ]
 };

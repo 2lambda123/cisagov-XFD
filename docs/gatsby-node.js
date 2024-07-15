@@ -22,24 +22,24 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
   createNodeField({
     node,
     name: 'sourceName',
-    value: fileNode.sourceInstanceName,
+    value: fileNode.sourceInstanceName
   });
 
   createNodeField({
     node,
     name: 'name',
-    value: fileNode.name,
+    value: fileNode.name
   });
 
   const slug = createFilePath({
     node,
     getNode,
-    basePath: `src/documentation-pages`,
+    basePath: `src/documentation-pages`
   });
   createNodeField({
     node,
     name: 'slug',
-    value: slug,
+    value: slug
   });
 };
 
@@ -49,7 +49,7 @@ exports.createPages = async ({ actions, graphql }) => {
   createRedirect({
     fromPath: '/usage',
     toPath: '/user-guide/quickstart',
-    isPermanent: false,
+    isPermanent: false
   });
 
   await createMarkdownPages(createPage, graphql);
@@ -64,8 +64,8 @@ async function createMarkdownPages(createPage, graphql) {
       path: node.fields.slug,
       component: pageTemplate,
       context: {
-        name: node.fields.slug,
-      },
+        name: node.fields.slug
+      }
     });
   });
 }
@@ -101,10 +101,10 @@ exports.onCreateWebpackConfig = ({ actions }) => {
           test: /\.html$/,
           loader: 'html-loader',
           options: {
-            minimize: false,
-          },
-        },
-      ],
-    },
+            minimize: false
+          }
+        }
+      ]
+    }
   });
 };

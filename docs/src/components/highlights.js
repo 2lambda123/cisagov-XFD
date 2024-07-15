@@ -5,7 +5,7 @@ import {
   faBoxes,
   faExclamationTriangle,
   faTasks,
-  faChartLine,
+  faChartLine
 } from '@fortawesome/free-solid-svg-icons';
 
 /*

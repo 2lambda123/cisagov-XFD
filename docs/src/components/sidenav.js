@@ -21,16 +21,16 @@ const SIDENAV_ITEMS = {
     { text: 'Analytics', link: '/dev/analytics/' },
     { text: 'Deployment', link: '/dev/deployment/' },
     { text: 'Setting up your own instance', link: '/dev/own-instance/' },
-    { text: 'Contribution Guidelines', link: '/dev/guidelines/' },
+    { text: 'Contribution Guidelines', link: '/dev/guidelines/' }
   ],
   'user-guide': [
     { text: 'Quickstart', link: '/user-guide/quickstart/' },
     {
       text: 'Crossfeed Product Overview',
-      link: '/user-guide/product-overview/',
+      link: '/user-guide/product-overview/'
     },
-    { text: 'Administration', link: '/user-guide/administration/' },
-  ],
+    { text: 'Administration', link: '/user-guide/administration/' }
+  ]
 };
 
 const SidenavBase = ({ current, headings, items }) => {
@@ -54,7 +54,7 @@ const SidenavBase = ({ current, headings, items }) => {
                       <span
                         style={{
                           display: 'block',
-                          paddingLeft: `${depth - 3}em`,
+                          paddingLeft: `${depth - 3}em`
                         }}
                       >
                         {value}
