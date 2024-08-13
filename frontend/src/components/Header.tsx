@@ -355,7 +355,7 @@ const HeaderNoCtx: React.FC<ContextType> = (props) => {
                     value={
                       showAllOrganizations
                         ? { name: 'All Organizations' }
-                        : currentOrganization ?? undefined
+                        : (currentOrganization ?? undefined)
                     }
                     filterOptions={(options, state) => {
                       // If already selected, show all
